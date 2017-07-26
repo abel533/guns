@@ -1,6 +1,5 @@
 package com.stylefeng.guns.modular.system.controller;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.stylefeng.guns.common.annotion.Permission;
 import com.stylefeng.guns.common.annotion.log.BussinessLog;
 import com.stylefeng.guns.common.constant.Const;
@@ -8,13 +7,12 @@ import com.stylefeng.guns.common.constant.factory.ConstantFactory;
 import com.stylefeng.guns.common.controller.BaseController;
 import com.stylefeng.guns.common.exception.BizExceptionEnum;
 import com.stylefeng.guns.common.exception.BussinessException;
-import com.stylefeng.guns.core.log.LogObjectHolder;
-import com.stylefeng.guns.core.util.ToolUtil;
-import com.stylefeng.guns.modular.system.dao.DictDao;
-import com.stylefeng.guns.modular.system.service.IDictService;
-import com.stylefeng.guns.modular.system.warpper.DictWarpper;
 import com.stylefeng.guns.common.persistence.dao.DictMapper;
 import com.stylefeng.guns.common.persistence.model.Dict;
+import com.stylefeng.guns.core.log.LogObjectHolder;
+import com.stylefeng.guns.core.util.ToolUtil;
+import com.stylefeng.guns.modular.system.service.IDictService;
+import com.stylefeng.guns.modular.system.warpper.DictWarpper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,16 +34,11 @@ import java.util.Map;
 @RequestMapping("/dict")
 public class DictController extends BaseController {
 
-    private String PREFIX = "/system/dict/";
-
-    @Resource
-    DictDao dictDao;
-
     @Resource
     DictMapper dictMapper;
-
     @Resource
     IDictService dictService;
+    private String PREFIX = "/system/dict/";
 
     /**
      * 跳转到字典管理首页
@@ -69,9 +62,11 @@ public class DictController extends BaseController {
     @Permission(Const.ADMIN_NAME)
     @RequestMapping("/dict_edit/{dictId}")
     public String deptUpdate(@PathVariable Integer dictId, Model model) {
-        Dict dict = dictMapper.selectById(dictId);
+        Dict dict = dictMapper.selectByPrimaryKey(dictId);
         model.addAttribute("dict", dict);
-        List<Dict> subDicts = dictMapper.selectList(new EntityWrapper<Dict>().eq("pid", dictId));
+        Dict queryModel = new Dict();
+        dict.setPid(dictId);
+        List<Dict> subDicts = dictMapper.select(queryModel);
         model.addAttribute("subDicts", subDicts);
         LogObjectHolder.me().set(dict);
         return PREFIX + "dict_edit.html";
@@ -90,7 +85,7 @@ public class DictController extends BaseController {
         if (ToolUtil.isOneEmpty(dictName, dictValues)) {
             throw new BussinessException(BizExceptionEnum.REQUEST_NULL);
         }
-        this.dictService.addDict(dictName, dictValues);
+        dictService.addDict(dictName, dictValues);
         return SUCCESS_TIP;
     }
 
@@ -101,7 +96,7 @@ public class DictController extends BaseController {
     @Permission(Const.ADMIN_NAME)
     @ResponseBody
     public Object list(String condition) {
-        List<Map<String, Object>> list = this.dictDao.list(condition);
+        List<Map<String, Object>> list = dictMapper.list(condition);
         return super.warpObject(new DictWarpper(list));
     }
 
@@ -112,7 +107,7 @@ public class DictController extends BaseController {
     @Permission(Const.ADMIN_NAME)
     @ResponseBody
     public Object detail(@PathVariable("dictId") Integer dictId) {
-        return dictMapper.selectById(dictId);
+        return dictMapper.selectByPrimaryKey(dictId);
     }
 
     /**
@@ -142,7 +137,7 @@ public class DictController extends BaseController {
         //缓存被删除的名称
         LogObjectHolder.me().set(ConstantFactory.me().getDictName(dictId));
 
-        this.dictService.delteDict(dictId);
+        dictService.delteDict(dictId);
         return SUCCESS_TIP;
     }
 

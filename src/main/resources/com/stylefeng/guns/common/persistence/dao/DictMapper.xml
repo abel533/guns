@@ -11,4 +11,24 @@
 		<result column="tips" property="tips" />
 	</resultMap>
 
+    <sql id="Base_Column_List">
+        id, num, pid, name, tips
+    </sql>
+
+    <select id="selectByCode" resultType="dict">
+        select
+        <include refid="Base_Column_List"/>
+        from dict
+        where code = #{code}
+    </select>
+
+    <select id="list" resultType="map">
+        select * from dict
+        where pid = 0
+        <if test="condition != null and condition != ''">
+            AND name like CONCAT('%',#{condition},'%')
+        </if>
+        order by id ASC
+    </select>
+
 </mapper>

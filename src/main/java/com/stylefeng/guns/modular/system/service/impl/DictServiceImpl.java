@@ -1,15 +1,13 @@
 package com.stylefeng.guns.modular.system.service.impl;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.stylefeng.guns.common.exception.BizExceptionEnum;
 import com.stylefeng.guns.common.exception.BussinessException;
-import com.stylefeng.guns.modular.system.dao.DictDao;
-import com.stylefeng.guns.modular.system.service.IDictService;
 import com.stylefeng.guns.common.persistence.dao.DictMapper;
 import com.stylefeng.guns.common.persistence.model.Dict;
+import com.stylefeng.guns.modular.system.service.IDictService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -22,15 +20,14 @@ import static com.stylefeng.guns.common.constant.factory.MutiStrFactory.*;
 public class DictServiceImpl implements IDictService {
 
     @Resource
-    DictDao dictDao;
-
-    @Resource
     DictMapper dictMapper;
 
     @Override
     public void addDict(String dictName, String dictValues) {
         //判断有没有该字典
-        List<Dict> dicts = dictMapper.selectList(new EntityWrapper<Dict>().eq("name", dictName).and().eq("pid", 0));
+        Example example = new Example(Dict.class);
+        example.createCriteria().andEqualTo("name", dictName).andEqualTo("pid", 0);
+        List<Dict> dicts = dictMapper.selectByExample(example);
         if(dicts != null && dicts.size() > 0){
             throw new BussinessException(BizExceptionEnum.DICT_EXISTED);
         }
@@ -73,11 +70,10 @@ public class DictServiceImpl implements IDictService {
     @Override
     public void delteDict(Integer dictId) {
         //删除这个字典的子词典
-        Wrapper<Dict> dictEntityWrapper = new EntityWrapper<>();
-        dictEntityWrapper = dictEntityWrapper.eq("pid", dictId);
-        dictMapper.delete(dictEntityWrapper);
-
+        Dict query = new Dict();
+        query.setPid(dictId);
+        dictMapper.delete(query);
         //删除这个词典
-        dictMapper.deleteById(dictId);
+        dictMapper.deleteByPrimaryKey(dictId);
     }
 }

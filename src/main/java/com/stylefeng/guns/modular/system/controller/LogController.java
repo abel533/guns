@@ -1,18 +1,17 @@
 package com.stylefeng.guns.modular.system.controller;
 
-import com.baomidou.mybatisplus.mapper.SqlRunner;
-import com.baomidou.mybatisplus.plugins.Page;
+import com.github.pagehelper.PageHelper;
 import com.stylefeng.guns.common.annotion.Permission;
 import com.stylefeng.guns.common.annotion.log.BussinessLog;
 import com.stylefeng.guns.common.constant.Const;
-import com.stylefeng.guns.common.constant.factory.PageFactory;
 import com.stylefeng.guns.common.constant.state.BizLogType;
 import com.stylefeng.guns.common.controller.BaseController;
-import com.stylefeng.guns.core.support.BeanKit;
-import com.stylefeng.guns.modular.system.dao.LogDao;
-import com.stylefeng.guns.modular.system.warpper.LogWarpper;
+import com.stylefeng.guns.common.page.PageReq;
+import com.stylefeng.guns.common.persistence.dao.LoginLogMapper;
 import com.stylefeng.guns.common.persistence.dao.OperationLogMapper;
 import com.stylefeng.guns.common.persistence.model.OperationLog;
+import com.stylefeng.guns.core.support.BeanKit;
+import com.stylefeng.guns.modular.system.warpper.LogWarpper;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +38,7 @@ public class LogController extends BaseController {
     private OperationLogMapper operationLogMapper;
 
     @Resource
-    private LogDao logDao;
+    private LoginLogMapper loginLogMapper;
 
     /**
      * 跳转到日志管理的首页
@@ -56,10 +55,10 @@ public class LogController extends BaseController {
     @Permission(Const.ADMIN_NAME)
     @ResponseBody
     public Object list(@RequestParam(required = false) String beginTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String logName, @RequestParam(required = false) Integer logType) {
-        Page<OperationLog> page = new PageFactory<OperationLog>().defaultPage();
-        List<Map<String, Object>> result = logDao.getOperationLogs(page, beginTime, endTime, logName, BizLogType.valueOf(logType), page.getOrderByField(), page.isAsc());
-        page.setRecords((List<OperationLog>) new LogWarpper(result).warp());
-        return super.packForBT(page);
+        PageReq params = defaultPage();
+        PageHelper.offsetPage(params.getOffset(), params.getLimit());
+        List<Map<String, Object>> result = loginLogMapper.getOperationLogs(beginTime, endTime, logName, BizLogType.valueOf(logType), params.getSort(), params.isAsc());
+        return packForBT(result);
     }
 
     /**
@@ -69,7 +68,7 @@ public class LogController extends BaseController {
     @Permission(Const.ADMIN_NAME)
     @ResponseBody
     public Object detail(@PathVariable Integer id) {
-        OperationLog operationLog = operationLogMapper.selectById(id);
+        OperationLog operationLog = operationLogMapper.selectByPrimaryKey(id);
         Map<String, Object> stringObjectMap = BeanKit.beanToMap(operationLog);
         return super.warpObject(new LogWarpper(stringObjectMap));
     }
@@ -82,7 +81,7 @@ public class LogController extends BaseController {
     @Permission(Const.ADMIN_NAME)
     @ResponseBody
     public Object delLog() {
-        SqlRunner.db().delete("delete from operation_log");
+        operationLogMapper.delete(new OperationLog());
         return super.SUCCESS_TIP;
     }
 }

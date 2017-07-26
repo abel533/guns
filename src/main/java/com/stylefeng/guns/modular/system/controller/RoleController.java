@@ -11,17 +11,16 @@ import com.stylefeng.guns.common.controller.BaseController;
 import com.stylefeng.guns.common.exception.BizExceptionEnum;
 import com.stylefeng.guns.common.exception.BussinessException;
 import com.stylefeng.guns.common.node.ZTreeNode;
-import com.stylefeng.guns.core.cache.CacheKit;
-import com.stylefeng.guns.core.log.LogObjectHolder;
-import com.stylefeng.guns.core.util.Convert;
-import com.stylefeng.guns.core.util.ToolUtil;
-import com.stylefeng.guns.modular.system.dao.RoleDao;
-import com.stylefeng.guns.modular.system.service.IRoleService;
-import com.stylefeng.guns.modular.system.warpper.RoleWarpper;
 import com.stylefeng.guns.common.persistence.dao.RoleMapper;
 import com.stylefeng.guns.common.persistence.dao.UserMapper;
 import com.stylefeng.guns.common.persistence.model.Role;
 import com.stylefeng.guns.common.persistence.model.User;
+import com.stylefeng.guns.core.cache.CacheKit;
+import com.stylefeng.guns.core.log.LogObjectHolder;
+import com.stylefeng.guns.core.util.Convert;
+import com.stylefeng.guns.core.util.ToolUtil;
+import com.stylefeng.guns.modular.system.service.IRoleService;
+import com.stylefeng.guns.modular.system.warpper.RoleWarpper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -54,9 +53,6 @@ public class RoleController extends BaseController {
     RoleMapper roleMapper;
 
     @Resource
-    RoleDao roleDao;
-
-    @Resource
     IRoleService roleService;
 
     /**
@@ -84,7 +80,7 @@ public class RoleController extends BaseController {
         if (ToolUtil.isEmpty(roleId)) {
             throw new BussinessException(BizExceptionEnum.REQUEST_NULL);
         }
-        Role role = this.roleMapper.selectById(roleId);
+        Role role = roleMapper.selectByPrimaryKey(roleId);
         model.addAttribute(role);
         model.addAttribute("pName", ConstantFactory.me().getSingleRoleName(role.getPid()));
         model.addAttribute("deptName", ConstantFactory.me().getDeptName(role.getDeptid()));
@@ -113,7 +109,7 @@ public class RoleController extends BaseController {
     @RequestMapping(value = "/list")
     @ResponseBody
     public Object list(@RequestParam(required = false) String roleName) {
-        List<Map<String, Object>> roles = this.roleDao.selectRoles(super.getPara("roleName"));
+        List<Map<String, Object>> roles = roleMapper.selectRoles(super.getPara("roleName"));
         return super.warpObject(new RoleWarpper(roles));
     }
 
@@ -129,7 +125,7 @@ public class RoleController extends BaseController {
             throw new BussinessException(BizExceptionEnum.REQUEST_NULL);
         }
         role.setId(null);
-        this.roleMapper.insert(role);
+        roleMapper.insert(role);
         return SUCCESS_TIP;
     }
 
@@ -144,7 +140,7 @@ public class RoleController extends BaseController {
         if (result.hasErrors()) {
             throw new BussinessException(BizExceptionEnum.REQUEST_NULL);
         }
-        this.roleMapper.updateById(role);
+        roleMapper.updateByPrimaryKeySelective(role);
 
         //删除缓存
         CacheKit.removeAll(Cache.CONSTANT);
@@ -171,7 +167,7 @@ public class RoleController extends BaseController {
         //缓存被删除的角色名称
         LogObjectHolder.me().set(ConstantFactory.me().getSingleRoleName(roleId));
 
-        this.roleService.delRoleById(roleId);
+        roleService.delRoleById(roleId);
 
         //删除缓存
         CacheKit.removeAll(Cache.CONSTANT);
@@ -187,7 +183,7 @@ public class RoleController extends BaseController {
         if (ToolUtil.isEmpty(roleId)) {
             throw new BussinessException(BizExceptionEnum.REQUEST_NULL);
         }
-        this.roleMapper.selectById(roleId);
+        roleMapper.selectByPrimaryKey(roleId);
         return SUCCESS_TIP;
     }
 
@@ -202,7 +198,7 @@ public class RoleController extends BaseController {
         if (ToolUtil.isOneEmpty(roleId)) {
             throw new BussinessException(BizExceptionEnum.REQUEST_NULL);
         }
-        this.roleService.setAuthority(roleId, ids);
+        roleService.setAuthority(roleId, ids);
         return SUCCESS_TIP;
     }
 
@@ -212,7 +208,7 @@ public class RoleController extends BaseController {
     @RequestMapping(value = "/roleTreeList")
     @ResponseBody
     public List<ZTreeNode> roleTreeList() {
-        List<ZTreeNode> roleTreeList = this.roleDao.roleTreeList();
+        List<ZTreeNode> roleTreeList = roleMapper.roleTreeList();
         roleTreeList.add(ZTreeNode.createParent());
         return roleTreeList;
     }
@@ -223,14 +219,14 @@ public class RoleController extends BaseController {
     @RequestMapping(value = "/roleTreeListByUserId/{userId}")
     @ResponseBody
     public List<ZTreeNode> roleTreeListByUserId(@PathVariable Integer userId) {
-        User theUser = this.userMapper.selectById(userId);
+        User theUser = userMapper.selectByPrimaryKey(userId);
         String roleid = theUser.getRoleid();
         if (ToolUtil.isEmpty(roleid)) {
-            List<ZTreeNode> roleTreeList = this.roleDao.roleTreeList();
+            List<ZTreeNode> roleTreeList = roleMapper.roleTreeList();
             return roleTreeList;
         } else {
             String[] strArray = Convert.toStrArray(",", roleid);
-            List<ZTreeNode> roleTreeListByUserId = this.roleDao.roleTreeListByRoleId(strArray);
+            List<ZTreeNode> roleTreeListByUserId = roleMapper.roleTreeListByRoleId(strArray);
             return roleTreeListByUserId;
         }
     }

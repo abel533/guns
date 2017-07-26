@@ -1,24 +1,44 @@
 # Guns V2.5
-新版Guns基于SpringBoot全面升级,完美整合springmvc + shiro + mybatis-plus + beetl!
 
-在不用写xml配置(V1.0)的基础上进一步简化项目配置,让您更专注于业务开发!抛弃传统spring xml的配置方式,利用springboot + javabean方式配置spring,极大简化了pom.xml配置和spring配置.
+新版Guns基于SpringBoot全面升级,完美整合springmvc + shiro + **MyBatis 通用 Mapper** + **分页插件 PageHelper** + beetl!
 
-Guns项目代码简洁,注释丰富,上手容易,同时Guns包含许多基础模块(用户管理,角色管理,部门管理,字典管理等10个模块),可以直接作为一个后台管理系统的脚手架.
+# 说明
 
-## 鸣谢
-1.[SpringBlade](http://git.oschina.net/smallc/SpringBlade)
-2.[beetl](http://ibeetl.com/)
-3.[mybatis-plus](http://git.oschina.net/baomidou/mybatis-plus)
+本项目 fork 自 [stylefeng](http://git.oschina.net/naan1993) 的 [Guns](http://git.oschina.net/naan1993/guns)！
 
-## 感谢以下对Guns做出贡献的人
-1.[Swifly](http://git.oschina.net/cyf783)
-2.[liujiliang](liujiliang@chinasofti.com)
-3.[poseidon-ocean](poseidon@163.com)
-4.[扎西多顿](http://git.oschina.net/zhaping)
-5.[ilaotan](http://git.oschina.net/xiaosheng12345)
+经过对 Guns 项目的修改，使得该项目成为一个通用 Mapper 和 分页插件使用的示例。
 
-## 技术讨论,[wiki地址](http://git.oschina.net/naan1993/guns/wikis/home)
-如果对项目有任何疑问或者建议,欢迎加入Guns技术交流群:254550081(加之前请先看一遍wiki文档,再看一遍readme)
+项目引入了下面两个依赖：
+```xml
+<dependency>
+    <groupId>tk.mybatis</groupId>
+    <artifactId>mapper-spring-boot-starter</artifactId>
+    <version>${mapper-starter.version}</version>
+</dependency>
+<dependency>
+    <groupId>com.github.pagehelper</groupId>
+    <artifactId>pagehelper-spring-boot-starter</artifactId>
+    <version>${pagehelper-starter.version}</version>
+</dependency>
+```
+完全使用 MyBatis 官方的 Starter.
+
+一个最简单的 Spring Boot 集成项目：
+
+https://github.com/abel533/MyBatis-Spring-Boot
+
+# 修改说明
+
+本项目对 Guns 的改动为：
+
+1. 将 mybatis-plus 改成了通用 Mapper.
+2. 增加分页插件 PageHelper.
+3. 去掉`com.stylefeng.guns.modular.system.dao`包中的所有DAO，将方法放到对应的Mapper接口中.
+4. 将 Mapper.xml 移动到 resources 中
+
+关于两者的对比，可以通过 commit 信息查看。
+
+更多 MyBatis 相关工具可以访问： http://mybatis.tk
 
 ## V2.5更新日志
 1. 新增数据范围功能(例如两个角色都有用户管理权限,但是下级部门不能看到上级部门的数据)
@@ -27,12 +47,6 @@ Guns项目代码简洁,注释丰富,上手容易,同时Guns包含许多基础模
 4. 修复添加顶级部门添加不了的bug
 5. 解决日期格式化工具类线程安全的问题
 6. 修复日志记录会出现多个重复文件的bug
-
-### 如果不喜欢SpringBoot?
-如果您不喜欢用SpringBoot,或者您是一个spring初学者,您可以切换到***[Guns V1.0(点击这里)](http://git.oschina.net/naan1993/guns/tree/v1.0/)***分支,
-Guns V1.0基于spring的java bean方式配置项目,同样简洁易上手.
-
-注:SpringBoot强大的Auto Config和统一的依赖管理极大的简化了spring配置和maven依赖,在不了解其都配置了哪些东西的基础上可能会对初学者有一定困扰,所以建议初学者先看Guns V1.0
 
 ## 功能简介
 1. 用户管理
@@ -48,9 +62,10 @@ Guns V1.0基于spring的java bean方式配置项目,同样简洁易上手.
 
 ## 使用说明
 1. 导入sql/guns.sql文件到mysql数据库
-2. 以maven方式导入项目到ide
-3. 修改application.yml中的数据库相关的配置,改为您本机的数据库配置
-4. 启动项目,管理员***账号admin/密码111111***
+2. 修改application.yml中的数据库用户名和密码
+3. 以maven方式导入项目到ide
+4. 修改application.yml中的数据库相关的配置,改为您本机的数据库配置
+5. 启动项目,管理员***账号admin/密码111111***
 
 ### 如何启动项目
 Guns目前支持三种启动方式:
@@ -87,7 +102,8 @@ java -jar guns-1.0.0-SNAPSHOT.jar
 
 ### 后端
 1. SpringBoot 1.5.3.RELEASE
-2. MyBatis-Plus 2.0.8
+2. MyBatis-通用Mapper-starter 1.1.3
+2. MyBats-PageHelper-starter 1.1.2
 3. MyBatis 3.4.4
 4. Spring 4.3.8.RELEASE
 5. Beetl 2.7.15
@@ -265,11 +281,6 @@ swagger会管理所有包含@ApiOperation注解的控制器方法，同时，可
  })
  @RequestMapping(value = "/generate", method = RequestMethod.POST)
 ```
-
-## 常见问题答疑
-1. 为何有的业务没有service层: 部分业务比较简单,所以就没写service层,写service是为了让复杂业务更有条理,更清晰.
-2. 为何既有dao,又有mapper: mapper是mybatis-plus自动生成的,里边有许多mybatis-plus增强的方法,dao是自己写的业务,mybatis-plus自动生成代码时会覆盖mapper,所以就把自己写的dao分开了,生成代码的时候不影响
-3. 为何分页是前端实现:部分页面因为数据量比较少,就直接用客户端分页了,日志页面的分页是采用服务端分页的,如果其他业务有特别需要,可以参考日志的写法
 
 ## 效果图
 ![输入图片说明](https://git.oschina.net/uploads/images/2017/0604/194616_36ed7fd6_551203.png "在这里输入图片标题")

@@ -1,7 +1,5 @@
 package com.stylefeng.guns.system;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.stylefeng.guns.base.BaseJunit;
 import com.stylefeng.guns.common.persistence.dao.MenuMapper;
 import com.stylefeng.guns.common.persistence.model.Menu;
@@ -30,7 +28,7 @@ public class MenuTest extends BaseJunit {
      */
     @Test
     public void generatePcodes() {
-        List<Menu> menus = menuMapper.selectList(null);
+        List<Menu> menus = menuMapper.selectAll();
         for (Menu menu : menus) {
             if ("0".equals(menu.getPcode()) || null == menu.getPcode()) {
                 menu.setPcodes("[0],");
@@ -54,14 +52,14 @@ public class MenuTest extends BaseJunit {
 
                 menu.setPcodes(sb.toString());
             }
-            menu.updateById();
+            menuMapper.updateByPrimaryKey(menu);
         }
     }
 
     private Menu getParentMenu(String code) {
-        Wrapper<Menu> wrapper = new EntityWrapper<Menu>();
-        wrapper = wrapper.eq("code", code);
-        List<Menu> menus = menuMapper.selectList(wrapper);
+        Menu queryModel = new Menu();
+        queryModel.setCode(code);
+        List<Menu> menus = menuMapper.select(queryModel);
         if (menus == null || menus.size() == 0) {
             return new Menu();
         } else {

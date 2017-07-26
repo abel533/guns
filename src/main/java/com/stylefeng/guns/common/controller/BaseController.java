@@ -1,11 +1,13 @@
 package com.stylefeng.guns.common.controller;
 
-import com.baomidou.mybatisplus.plugins.Page;
+import com.stylefeng.guns.common.constant.state.Order;
 import com.stylefeng.guns.common.constant.tips.SuccessTip;
 import com.stylefeng.guns.common.page.PageInfoBT;
+import com.stylefeng.guns.common.page.PageReq;
 import com.stylefeng.guns.common.warpper.BaseControllerWarpper;
 import com.stylefeng.guns.core.support.HttpKit;
 import com.stylefeng.guns.core.util.FileUtil;
+import com.stylefeng.guns.core.util.ToolUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 public class BaseController {
 
@@ -58,8 +61,27 @@ public class BaseController {
     /**
      * 把service层的分页信息，封装为bootstrap table通用的分页封装
      */
-    protected <T> PageInfoBT<T> packForBT(Page<T> page) {
+    protected <T> PageInfoBT<T> packForBT(List<T> page) {
         return new PageInfoBT<T>(page);
+    }
+
+    public PageReq defaultPage() {
+        HttpServletRequest request = HttpKit.getRequest();
+        int limit = Integer.valueOf(request.getParameter("limit"));
+        int offset = Integer.valueOf(request.getParameter("offset"));
+        String sort = request.getParameter("sort");
+        String order = request.getParameter("order");
+        PageReq pageReq = new PageReq(limit, offset, sort, order);
+        if (ToolUtil.isEmpty(sort)) {
+            pageReq.setOpenSort(false);
+        } else {
+            if (Order.ASC.getDes().equals(order)) {
+                pageReq.setAsc(true);
+            } else {
+                pageReq.setAsc(false);
+            }
+        }
+        return pageReq;
     }
 
     /**

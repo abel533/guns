@@ -16,7 +16,6 @@ import com.stylefeng.guns.common.persistence.model.Menu;
 import com.stylefeng.guns.core.log.LogObjectHolder;
 import com.stylefeng.guns.core.support.BeanKit;
 import com.stylefeng.guns.core.util.ToolUtil;
-import com.stylefeng.guns.modular.system.dao.MenuDao;
 import com.stylefeng.guns.modular.system.service.IMenuService;
 import com.stylefeng.guns.modular.system.warpper.MenuWarpper;
 import org.springframework.stereotype.Controller;
@@ -48,9 +47,6 @@ public class MenuController extends BaseController {
     MenuMapper menuMapper;
 
     @Resource
-    MenuDao menuDao;
-
-    @Resource
     IMenuService menuService;
 
     /**
@@ -78,12 +74,12 @@ public class MenuController extends BaseController {
         if (ToolUtil.isEmpty(menuId)) {
             throw new BussinessException(BizExceptionEnum.REQUEST_NULL);
         }
-        Menu menu = this.menuMapper.selectById(menuId);
+        Menu menu = menuMapper.selectByPrimaryKey(menuId);
 
         //获取父级菜单的id
         Menu temp = new Menu();
         temp.setCode(menu.getPcode());
-        Menu pMenu = this.menuMapper.selectOne(temp);
+        Menu pMenu = menuMapper.selectOne(temp);
 
         //如果父级是顶级菜单
         if (pMenu == null) {
@@ -113,8 +109,7 @@ public class MenuController extends BaseController {
         }
         //设置父级菜单编号
         menuSetPcode(menu);
-
-        this.menuMapper.updateById(menu);
+        menuMapper.updateByPrimaryKeySelective(menu);
         return SUCCESS_TIP;
     }
 
@@ -125,7 +120,7 @@ public class MenuController extends BaseController {
     @RequestMapping(value = "/list")
     @ResponseBody
     public Object list(@RequestParam(required = false) String menuName, @RequestParam(required = false) String level) {
-        List<Map<String, Object>> menus = this.menuDao.selectMenus(menuName, level);
+        List<Map<String, Object>> menus = menuMapper.selectMenus(menuName, level);
         return super.warpObject(new MenuWarpper(menus));
     }
 
@@ -151,7 +146,7 @@ public class MenuController extends BaseController {
         menuSetPcode(menu);
 
         menu.setStatus(MenuStatus.ENABLE.getCode());
-        this.menuMapper.insert(menu);
+        menuMapper.insert(menu);
         return SUCCESS_TIP;
     }
 
@@ -170,7 +165,7 @@ public class MenuController extends BaseController {
         //缓存菜单的名称
         LogObjectHolder.me().set(ConstantFactory.me().getMenuName(menuId));
 
-        this.menuService.delMenuContainSubMenus(menuId);
+        menuService.delMenuContainSubMenus(menuId);
         return SUCCESS_TIP;
     }
 
@@ -183,7 +178,7 @@ public class MenuController extends BaseController {
         if (ToolUtil.isEmpty(menuId)) {
             throw new BussinessException(BizExceptionEnum.REQUEST_NULL);
         }
-        this.menuMapper.selectById(menuId);
+        menuMapper.selectByPrimaryKey(menuId);
         return SUCCESS_TIP;
     }
 
@@ -193,7 +188,7 @@ public class MenuController extends BaseController {
     @RequestMapping(value = "/menuTreeList")
     @ResponseBody
     public List<ZTreeNode> menuTreeList() {
-        List<ZTreeNode> roleTreeList = this.menuDao.menuTreeList();
+        List<ZTreeNode> roleTreeList = menuMapper.menuTreeList();
         return roleTreeList;
     }
 
@@ -203,7 +198,7 @@ public class MenuController extends BaseController {
     @RequestMapping(value = "/selectMenuTreeList")
     @ResponseBody
     public List<ZTreeNode> selectMenuTreeList() {
-        List<ZTreeNode> roleTreeList = this.menuDao.menuTreeList();
+        List<ZTreeNode> roleTreeList = menuMapper.menuTreeList();
         roleTreeList.add(ZTreeNode.createParent());
         return roleTreeList;
     }
@@ -214,12 +209,12 @@ public class MenuController extends BaseController {
     @RequestMapping(value = "/menuTreeListByRoleId/{roleId}")
     @ResponseBody
     public List<ZTreeNode> menuTreeListByRoleId(@PathVariable Integer roleId) {
-        List<Integer> menuIds = this.menuDao.getMenuIdsByRoleId(roleId);
+        List<Integer> menuIds = menuMapper.getMenuIdsByRoleId(roleId);
         if (ToolUtil.isEmpty(menuIds)) {
-            List<ZTreeNode> roleTreeList = this.menuDao.menuTreeList();
+            List<ZTreeNode> roleTreeList = menuMapper.menuTreeList();
             return roleTreeList;
         } else {
-            List<ZTreeNode> roleTreeListByUserId = this.menuDao.menuTreeListByMenuIds(menuIds);
+            List<ZTreeNode> roleTreeListByUserId = menuMapper.menuTreeListByMenuIds(menuIds);
             return roleTreeListByUserId;
         }
     }
@@ -234,7 +229,7 @@ public class MenuController extends BaseController {
             menu.setLevels(1);
         } else {
             int code = Integer.parseInt(menu.getPcode());
-            Menu pMenu = menuMapper.selectById(code);
+            Menu pMenu = menuMapper.selectByPrimaryKey(code);
             Integer pLevels = pMenu.getLevels();
             menu.setPcode(pMenu.getCode());
 

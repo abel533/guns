@@ -1,6 +1,6 @@
 package com.stylefeng.guns.common.page;
 
-import com.baomidou.mybatisplus.plugins.Page;
+import com.github.pagehelper.Page;
 
 import java.util.List;
 
@@ -18,9 +18,13 @@ public class PageInfoBT<T> {
     // 总数
     private long total;
 
-    public PageInfoBT(Page<T> page) {
-        this.rows = page.getRecords();
-        this.total = page.getTotal();
+    public PageInfoBT(List<T> page) {
+        this.rows = page;
+        if (page instanceof Page) {
+            this.total = ((Page) page).getTotal();
+        } else {
+            this.total = page.size();
+        }
     }
 
     public List<T> getRows() {

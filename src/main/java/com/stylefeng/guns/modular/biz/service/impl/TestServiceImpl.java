@@ -25,18 +25,18 @@ public class TestServiceImpl implements ITestService {
     @Override
     @DataSource(name = DSEnum.DATA_SOURCE_BIZ)
     public void testBiz() {
-        Test test = testMapper.selectById(1);
+        Test test = testMapper.selectByPrimaryKey(1);
         test.setId(22);
-        test.insert();
+        testMapper.insert(test);
     }
 
 
     @Override
     @DataSource(name = DSEnum.DATA_SOURCE_GUNS)
     public void testGuns() {
-        Test test = testMapper.selectById(1);
+        Test test = testMapper.selectByPrimaryKey(1);
         test.setId(33);
-        test.insert();
+        testMapper.insert(test);
     }
 
     @Override

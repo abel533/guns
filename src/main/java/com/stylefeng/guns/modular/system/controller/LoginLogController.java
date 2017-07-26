@@ -1,21 +1,19 @@
 package com.stylefeng.guns.modular.system.controller;
 
-import com.baomidou.mybatisplus.mapper.SqlRunner;
-import com.baomidou.mybatisplus.plugins.Page;
+import com.github.pagehelper.PageHelper;
 import com.stylefeng.guns.common.annotion.Permission;
 import com.stylefeng.guns.common.annotion.log.BussinessLog;
 import com.stylefeng.guns.common.constant.Const;
-import com.stylefeng.guns.common.constant.factory.PageFactory;
 import com.stylefeng.guns.common.controller.BaseController;
-import com.stylefeng.guns.modular.system.dao.LogDao;
-import com.stylefeng.guns.modular.system.warpper.LogWarpper;
-import com.stylefeng.guns.common.persistence.model.OperationLog;
+import com.stylefeng.guns.common.page.PageReq;
+import com.stylefeng.guns.common.persistence.dao.LoginLogMapper;
+import com.stylefeng.guns.common.persistence.model.LoginLog;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -31,8 +29,8 @@ public class LoginLogController extends BaseController {
 
     private static String PREFIX = "/system/log/";
 
-    @Resource
-    private LogDao logDao;
+    @Autowired
+    private LoginLogMapper loginLogMapper;
 
     /**
      * 跳转到日志管理的首页
@@ -49,10 +47,10 @@ public class LoginLogController extends BaseController {
     @Permission(Const.ADMIN_NAME)
     @ResponseBody
     public Object list(@RequestParam(required = false) String beginTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String logName) {
-        Page<OperationLog> page = new PageFactory<OperationLog>().defaultPage();
-        List<Map<String, Object>> result = logDao.getLoginLogs(page, beginTime, endTime, logName, page.getOrderByField(), page.isAsc());
-        page.setRecords((List<OperationLog>) new LogWarpper(result).warp());
-        return super.packForBT(page);
+        PageReq params = defaultPage();
+        PageHelper.offsetPage(params.getOffset(), params.getLimit());
+        List<Map<String, Object>> result = loginLogMapper.getLoginLogs(beginTime, endTime, logName, params.getSort(), params.isAsc());
+        return packForBT(result);
     }
 
     /**
@@ -63,7 +61,7 @@ public class LoginLogController extends BaseController {
     @Permission(Const.ADMIN_NAME)
     @ResponseBody
     public Object delLog() {
-        SqlRunner.db().delete("delete from login_log");
+        loginLogMapper.delete(new LoginLog());
         return super.SUCCESS_TIP;
     }
 }

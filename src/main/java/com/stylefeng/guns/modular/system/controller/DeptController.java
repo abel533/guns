@@ -12,7 +12,6 @@ import com.stylefeng.guns.common.persistence.dao.DeptMapper;
 import com.stylefeng.guns.common.persistence.model.Dept;
 import com.stylefeng.guns.core.log.LogObjectHolder;
 import com.stylefeng.guns.core.util.ToolUtil;
-import com.stylefeng.guns.modular.system.dao.DeptDao;
 import com.stylefeng.guns.modular.system.service.IDeptService;
 import com.stylefeng.guns.modular.system.warpper.DeptWarpper;
 import org.springframework.stereotype.Controller;
@@ -36,16 +35,11 @@ import java.util.Map;
 @RequestMapping("/dept")
 public class DeptController extends BaseController {
 
-    private String PREFIX = "/system/dept/";
-
-    @Resource
-    DeptDao deptDao;
-
     @Resource
     DeptMapper deptMapper;
-
     @Resource
     IDeptService deptService;
+    private String PREFIX = "/system/dept/";
 
     /**
      * 跳转到部门管理首页
@@ -69,7 +63,7 @@ public class DeptController extends BaseController {
     @Permission
     @RequestMapping("/dept_update/{deptId}")
     public String deptUpdate(@PathVariable Integer deptId, Model model) {
-        Dept dept = deptMapper.selectById(deptId);
+        Dept dept = deptMapper.selectByPrimaryKey(deptId);
         model.addAttribute(dept);
         model.addAttribute("pName", ConstantFactory.me().getDeptName(dept.getPid()));
         LogObjectHolder.me().set(dept);
@@ -82,7 +76,7 @@ public class DeptController extends BaseController {
     @RequestMapping(value = "/tree")
     @ResponseBody
     public List<ZTreeNode> tree() {
-        List<ZTreeNode> tree = this.deptDao.tree();
+        List<ZTreeNode> tree = deptMapper.tree();
         tree.add(ZTreeNode.createParent());
         return tree;
     }
@@ -100,7 +94,7 @@ public class DeptController extends BaseController {
         }
         //完善pids,根据pid拿到pid的pids
         deptSetPids(dept);
-        return this.deptMapper.insert(dept);
+        return deptMapper.insert(dept);
     }
 
     /**
@@ -110,7 +104,7 @@ public class DeptController extends BaseController {
     @Permission
     @ResponseBody
     public Object list(String condition) {
-        List<Map<String, Object>> list = this.deptDao.list(condition);
+        List<Map<String, Object>> list = deptMapper.list(condition);
         return super.warpObject(new DeptWarpper(list));
     }
 
@@ -121,7 +115,7 @@ public class DeptController extends BaseController {
     @Permission
     @ResponseBody
     public Object detail(@PathVariable("deptId") Integer deptId) {
-        return deptMapper.selectById(deptId);
+        return deptMapper.selectByPrimaryKey(deptId);
     }
 
     /**
@@ -136,7 +130,7 @@ public class DeptController extends BaseController {
             throw new BussinessException(BizExceptionEnum.REQUEST_NULL);
         }
         deptSetPids(dept);
-        deptMapper.updateById(dept);
+        deptMapper.updateByPrimaryKeySelective(dept);
         return super.SUCCESS_TIP;
     }
 
@@ -163,7 +157,7 @@ public class DeptController extends BaseController {
             dept.setPids("[0],");
         } else {
             int pid = dept.getPid();
-            Dept temp = deptMapper.selectById(pid);
+            Dept temp = deptMapper.selectByPrimaryKey(pid);
             String pids = temp.getPids();
             dept.setPid(pid);
             dept.setPids(pids + "[" + pid + "],");

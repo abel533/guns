@@ -6,13 +6,12 @@ import com.stylefeng.guns.common.constant.factory.ConstantFactory;
 import com.stylefeng.guns.common.controller.BaseController;
 import com.stylefeng.guns.common.exception.BizExceptionEnum;
 import com.stylefeng.guns.common.exception.BussinessException;
+import com.stylefeng.guns.common.persistence.dao.NoticeMapper;
+import com.stylefeng.guns.common.persistence.model.Notice;
 import com.stylefeng.guns.core.log.LogObjectHolder;
 import com.stylefeng.guns.core.shiro.ShiroKit;
 import com.stylefeng.guns.core.util.ToolUtil;
-import com.stylefeng.guns.modular.system.dao.NoticeDao;
 import com.stylefeng.guns.modular.system.warpper.NoticeWrapper;
-import com.stylefeng.guns.common.persistence.dao.NoticeMapper;
-import com.stylefeng.guns.common.persistence.model.Notice;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,9 +39,6 @@ public class NoticeController extends BaseController {
     @Resource
     private NoticeMapper noticeMapper;
 
-    @Resource
-    private NoticeDao noticeDao;
-
     /**
      * 跳转到通知列表首页
      */
@@ -64,7 +60,7 @@ public class NoticeController extends BaseController {
      */
     @RequestMapping("/notice_update/{noticeId}")
     public String noticeUpdate(@PathVariable Integer noticeId, Model model) {
-        Notice notice = this.noticeMapper.selectById(noticeId);
+        Notice notice = noticeMapper.selectByPrimaryKey(noticeId);
         model.addAttribute("notice",notice);
         LogObjectHolder.me().set(notice);
         return PREFIX + "notice_edit.html";
@@ -75,7 +71,7 @@ public class NoticeController extends BaseController {
      */
     @RequestMapping("/hello")
     public String hello() {
-        List<Map<String, Object>> notices = noticeDao.list(null);
+        List<Map<String, Object>> notices = noticeMapper.list(null);
         super.setAttr("noticeList",notices);
         return "/blackboard.html";
     }
@@ -86,7 +82,7 @@ public class NoticeController extends BaseController {
     @RequestMapping(value = "/list")
     @ResponseBody
     public Object list(String condition) {
-        List<Map<String, Object>> list = this.noticeDao.list(condition);
+        List<Map<String, Object>> list = noticeMapper.list(condition);
         return super.warpObject(new NoticeWrapper(list));
     }
 
@@ -102,7 +98,7 @@ public class NoticeController extends BaseController {
         }
         notice.setCreater(ShiroKit.getUser().getId());
         notice.setCreatetime(new Date());
-        notice.insert();
+        noticeMapper.insert(notice);
         return super.SUCCESS_TIP;
     }
 
@@ -113,12 +109,9 @@ public class NoticeController extends BaseController {
     @ResponseBody
     @BussinessLog(value = "删除通知",key = "noticeId",dict = Dict.DeleteDict)
     public Object delete(@RequestParam Integer noticeId) {
-
         //缓存通知名称
         LogObjectHolder.me().set(ConstantFactory.me().getNoticeTitle(noticeId));
-
-        this.noticeMapper.deleteById(noticeId);
-
+        noticeMapper.deleteByPrimaryKey(noticeId);
         return SUCCESS_TIP;
     }
 
@@ -132,10 +125,10 @@ public class NoticeController extends BaseController {
         if (ToolUtil.isOneEmpty(notice, notice.getId(), notice.getTitle(), notice.getContent())) {
             throw new BussinessException(BizExceptionEnum.REQUEST_NULL);
         }
-        Notice old = this.noticeMapper.selectById(notice.getId());
+        Notice old = noticeMapper.selectByPrimaryKey(notice.getId());
         old.setTitle(notice.getTitle());
         old.setContent(notice.getContent());
-        old.updateById();
+        noticeMapper.updateByPrimaryKey(old);
         return super.SUCCESS_TIP;
     }
 

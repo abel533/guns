@@ -1,7 +1,6 @@
 package com.stylefeng.guns.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.baomidou.mybatisplus.plugins.PaginationInterceptor;
 import com.stylefeng.guns.common.constant.DSEnum;
 import com.stylefeng.guns.config.properties.DruidProperties;
 import com.stylefeng.guns.config.properties.MutiDataSourceProperties;
@@ -87,14 +86,6 @@ public class MybatisPlusConfig {
         dynamicDataSource.setTargetDataSources(hashMap);
         dynamicDataSource.setDefaultTargetDataSource(dataSourceGuns);
         return dynamicDataSource;
-    }
-
-    /**
-     * mybatis-plus分页插件
-     */
-    @Bean
-    public PaginationInterceptor paginationInterceptor() {
-        return new PaginationInterceptor();
     }
 
     /**
