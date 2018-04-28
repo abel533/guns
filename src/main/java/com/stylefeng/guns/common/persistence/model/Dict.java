@@ -1,5 +1,7 @@
 package com.stylefeng.guns.common.persistence.model;
 
+import javax.persistence.Table;
+
 /**
  * <p>
  * 字典表
@@ -8,6 +10,7 @@ package com.stylefeng.guns.common.persistence.model;
  * @author stylefeng
  * @since 2017-07-11
  */
+@Table(name = "sys_dict")
 public class Dict extends Base {
 
     private static final long serialVersionUID = 1L;
