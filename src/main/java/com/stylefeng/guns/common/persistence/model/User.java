@@ -2,6 +2,8 @@ package com.stylefeng.guns.common.persistence.model;
 
 import java.util.Date;
 
+import javax.persistence.Table;
+
 /**
  * <p>
  * 管理员表
@@ -10,6 +12,7 @@ import java.util.Date;
  * @author stylefeng
  * @since 2017-07-11
  */
+@Table(name = "sys_user")
 public class User extends Base {
 
     private static final long serialVersionUID = 1L;
