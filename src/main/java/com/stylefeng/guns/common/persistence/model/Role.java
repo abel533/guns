@@ -1,5 +1,7 @@
 package com.stylefeng.guns.common.persistence.model;
 
+import javax.persistence.Table;
+
 /**
  * <p>
  * 角色表
@@ -8,6 +10,7 @@ package com.stylefeng.guns.common.persistence.model;
  * @author stylefeng
  * @since 2017-07-11
  */
+@Table(name = "sys_role")
 public class Role extends Base {
 
     private static final long serialVersionUID = 1L;

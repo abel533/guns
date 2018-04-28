@@ -2,6 +2,8 @@ package com.stylefeng.guns.common.persistence.model;
 
 import java.util.Date;
 
+import javax.persistence.Table;
+
 /**
  * <p>
  * 操作日志
@@ -10,6 +12,7 @@ import java.util.Date;
  * @author stylefeng
  * @since 2017-07-11
  */
+@Table(name = "sys_operation_log")
 public class OperationLog extends Base {
 
     private static final long serialVersionUID = 1L;
