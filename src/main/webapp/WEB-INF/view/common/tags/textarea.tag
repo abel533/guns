@@ -29,11 +29,12 @@
                @if(isNotEmpty(disabled)){
                     disabled="${disabled}"
                @}
-        >
         @if(isNotEmpty(value)){
-        ${tool.dateType(value)}
+        >${tool.dateType(value)}</textarea>
+        @}else{
+        ></textarea>
         @}
-        </textarea>
+        
         @if(isNotEmpty(hidden)){
             <textarea class="form-control" type="hidden" id="${hidden}" value="${hiddenValue!}"></textarea>
         @}
