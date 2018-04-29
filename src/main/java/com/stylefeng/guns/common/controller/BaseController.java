@@ -75,6 +75,7 @@ public class BaseController {
         if (ToolUtil.isEmpty(sort)) {
             pageReq.setOpenSort(false);
         } else {
+        	pageReq.setOpenSort(true);
             if (Order.ASC.getDes().equals(order)) {
                 pageReq.setAsc(true);
             } else {
