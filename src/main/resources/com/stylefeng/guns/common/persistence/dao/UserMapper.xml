@@ -54,17 +54,17 @@
     </select>
 
     <update id="setStatus">
-        update user set status = #{status} where id =
+        update sys_user set status = #{status} where id =
         #{userId}
     </update>
 
     <update id="changePwd">
-        update user set password = #{pwd} where id =
+        update sys_user set password = #{pwd} where id =
         #{userId}
     </update>
 
     <update id="setRoles">
-        update user set roleid = #{roleIds} where id =
+        update sys_user set roleid = #{roleIds} where id =
         #{userId}
     </update>
 
