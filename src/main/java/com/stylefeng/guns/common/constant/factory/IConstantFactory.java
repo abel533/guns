@@ -83,6 +83,7 @@ public interface IConstantFactory {
     /**
      * 根据字典名称和字典中的值获取对应的名称
      */
+    @Cacheable(value = Cache.CONSTANT, key = "'" + CacheKey.DICT_NAME + "'+#name+'_'+#val")
     String getDictsByName(String name, Integer val);
 
     /**
