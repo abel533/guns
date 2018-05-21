@@ -157,7 +157,9 @@ public class UserMgrController extends BaseController {
     @Permission
     @ResponseBody
     public Object list(@RequestParam(required = false) String name, @RequestParam(required = false) String beginTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) Integer deptid) {
-        DataScope dataScope = new DataScope(ShiroKit.getDeptDataScope());
+        Integer userId = ShiroKit.getUser().getId();
+        User user = userMapper.selectByPrimaryKey(userId);
+        DataScope dataScope = new DataScope(ShiroKit.getDeptDataScope(user));
         List<Map<String, Object>> users = userMapper.selectUsers(dataScope, name, beginTime, endTime, deptid);
         return new UserWarpper(users).warp();
     }
@@ -345,8 +347,8 @@ public class UserMgrController extends BaseController {
      * 判断当前登录的用户是否有操作这个用户的权限
      */
     private void assertAuth(Integer userId) {
-        List<Integer> deptDataScope = ShiroKit.getDeptDataScope();
         User user = userMapper.selectByPrimaryKey(userId);
+        List<Integer> deptDataScope = ShiroKit.getDeptDataScope(user);
         Integer deptid = user.getDeptid();
         if (deptDataScope.contains(deptid)) {
             return;
