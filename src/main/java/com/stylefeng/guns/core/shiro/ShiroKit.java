@@ -17,6 +17,7 @@ package com.stylefeng.guns.core.shiro;
 
 import com.stylefeng.guns.common.constant.Const;
 import com.stylefeng.guns.common.constant.factory.ConstantFactory;
+import com.stylefeng.guns.common.persistence.model.User;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.crypto.hash.SimpleHash;
@@ -274,7 +275,18 @@ public class ShiroKit {
      * 获取当前用户的部门数据范围的集合
      */
     public static List<Integer> getDeptDataScope() {
-        Integer deptId = getUser().getDeptId();
+        /*Integer deptId = getUser().getDeptId();
+        List<Integer> subDeptIds = ConstantFactory.me().getSubDeptId(deptId);
+        subDeptIds.add(deptId);
+        return subDeptIds;*/
+        return getDeptDataScope(null);
+    }
+
+    /**
+     * 获取当前用户的部门数据范围的集合
+     */
+    public static List<Integer> getDeptDataScope(User user) {
+        Integer deptId = user == null ? getUser().getDeptId() : user.getDeptid();
         List<Integer> subDeptIds = ConstantFactory.me().getSubDeptId(deptId);
         subDeptIds.add(deptId);
         return subDeptIds;
